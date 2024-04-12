@@ -4,7 +4,10 @@ import { redirect } from "next/navigation";
 import { getOrCreateConversation } from "@/lib/conversation";
 import { currentProfile } from "@/lib/current-profile";
 import { db } from "@/lib/db";
+
 import { ChatHeader } from "@/components/chat/chat-header";
+import { ChatMessages } from "@/components/chat/chat-messages";
+import { ChatInput } from "@/components/chat/chat-input";
 interface MemberIdPageProps {
     params: {
         memberId: string;
@@ -52,6 +55,27 @@ const MemberIdPage = async ({
                 name={otherMember.profile?.name !== "null null" ? otherMember.profile?.name : "Anonymous"}
                 serverId={params.serverId}
                 type="conversation"
+            />
+            <ChatMessages 
+                member={currentMember}
+                name={otherMember.profile?.name !== "null null" ? otherMember.profile?.name : "Anonymous"}
+                chatId={conversation.id}
+                type="conversation"
+                apiUrl="/api/direct-messages"
+                paramKey="conversationId"
+                paramValue={conversation.id}
+                socketUrl="/api/socket/direct-messages"
+                socketQuery={{
+                    conversationId: conversation.id,
+                }}
+            />
+            <ChatInput 
+                name={otherMember.profile?.name !== "null null" ? otherMember.profile?.name : "Anonymous"}
+                type="conversation"
+                apiUrl="/api/socket/direct-messages"
+                query={{ 
+                    conversationId: conversation.id,
+                }}
             />
         </div>
     )
