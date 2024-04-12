@@ -94,11 +94,11 @@ export const MembersModal = () => {
             Manage Members
           </DialogTitle>
           <DialogDescription className="text-center text-zinc-500">
-            {server?.members.length} Members
+            {server?.members?.length} Members
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="mt-8 max-h-[420px] pr-6">
-          {server?.members.map((member) => (
+          {server?.members?.map((member) => (
             <div key={member.id} className="flex items-center gap-x-2 mb-6">
               <UserAvatar src={member.profile.imageUrl}/>
               <div className="flex flex-col gap-y-1">

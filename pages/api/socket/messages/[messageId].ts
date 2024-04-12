@@ -93,10 +93,6 @@ export default async function handler (
         }
 
         if (req.method === "DELETE") {
-            if (!isMessageOwner) {
-                return res.status(403).json({ error: "Forbidden" });
-            }
-            
             message = await db.message.update({
                 where: {
                     id: messageId as string,

@@ -18,7 +18,9 @@ const SocketContext = createContext<SocketContextType>({
     isConnected: false
 });
 
-export const useSocket = () => useContext(SocketContext);
+export const useSocket = () => {
+    return useContext(SocketContext)
+};
 
 export const SocketProvider = ({ 
     children 
