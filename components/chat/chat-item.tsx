@@ -163,7 +163,7 @@ export const ChatItem = ({
                         </a>
                     )}
                     {isPDF && (
-                        <div className="relative flex items-center p-2 mt-2 rounded-md bg-background/10">
+                        <div className="relative flex items-center p-2 mt-2 rounded-md dark:bg-[#2B2D31] bg-[#F2F3F5]">
                             <FileIcon className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
                             <a
                             href={fileUrl}
