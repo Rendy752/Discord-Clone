@@ -35,9 +35,12 @@ const formSchema = z.object({
 export const InitialModal = () => {
   const [isMounted, setIsMounted] = useState(false);
   const router = useRouter();
+  const [error, setError] = useState('');
+
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -49,11 +52,17 @@ export const InitialModal = () => {
   const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      if (!values.imageUrl) {
+        setError('Server image is required');
+        return;
+      }
       await axios.post('/api/servers', values);
+      setError('');
       form.reset();
       router.refresh();
       window.location.reload();
-    } catch (error) {
+    } catch (error: any) {
+      setError(error.response.data.message);
       console.log(error);
     }
   };
@@ -85,9 +94,10 @@ export const InitialModal = () => {
                           endpoint="serverImage"
                           value={field.value}
                           onChange={field.onChange}
+                          setError={setError}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>{error}</FormMessage>
                     </FormItem>
                   )}
                 />
