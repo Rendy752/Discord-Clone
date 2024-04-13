@@ -26,17 +26,23 @@ import { Button } from '../ui/button';
 import { FileUpload } from '@/components/file-upload';
 import { useRouter } from 'next/navigation';
 import { useModal } from '@/hooks/use-modal-store';
+import { useState } from 'react';
+
 const formSchema = z.object({
   name: z
     .string()
     .min(1, { message: 'Server name is required' })
     .max(100, { message: 'Server name must be less than 100 characters' }),
-  imageUrl: z.string().min(1, { message: 'Server image is required' }),
+  imageUrl: z.object({
+    name: z.string(),
+    url: z.string(),
+  }),
 });
 
 export const CreateServerModal = () => {
   const { isOpen, onClose, type } = useModal();
   const router = useRouter();
+  const [error, setError] = useState('');
 
   const isModalOpen = isOpen && type === 'createServer';
 
@@ -44,18 +50,27 @@ export const CreateServerModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      imageUrl: '',
+      imageUrl: {
+        name: '',
+        url: '',
+      },
     },
   });
 
   const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      await axios.post('/api/servers', values);
+      if (!values.imageUrl.url) {
+        setError('Server image is required');
+        return;
+      }
+      await axios.post('/api/servers', {name: values.name, imageUrl: values.imageUrl.url});
       form.reset();
       router.refresh();
       onClose();
-    } catch (error) {
+      setError('');
+    } catch (error: any) {
+      setError(error.response.data.message);
       console.log(error);
     }
   };
@@ -63,6 +78,7 @@ export const CreateServerModal = () => {
   const handleClose = () => {
     form.reset();
     onClose();
+    setError('');
   }
 
   return (
@@ -91,9 +107,10 @@ export const CreateServerModal = () => {
                           endpoint="serverImage"
                           value={field.value}
                           onChange={field.onChange}
+                          setError={setError}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>{error}</FormMessage>
                     </FormItem>
                   )}
                 />

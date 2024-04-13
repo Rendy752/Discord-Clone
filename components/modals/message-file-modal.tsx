@@ -25,12 +25,19 @@ import { Button } from '../ui/button';
 import { FileUpload } from '@/components/file-upload';
 import { useRouter } from 'next/navigation';
 import { useModal } from '@/hooks/use-modal-store';
+import { useState } from 'react';
+
 const formSchema = z.object({
-  fileUrl: z.string().min(1, { message: 'Attachment is required' }),
+  fileUrl: z.object({
+    name: z.string(),
+    url: z.string(),
+  }),
 });
+
 export const MessageFileModal = () => {
   const { isOpen, onClose, type, data } = useModal();
   const router = useRouter();
+  const [error, setError] = useState("");
 
   const isModalOpen = isOpen && type === 'messageFile';
   const { apiUrl, query } = data;
@@ -38,31 +45,42 @@ export const MessageFileModal = () => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fileUrl: '',
+      fileUrl: {
+        name: '',
+        url: '',
+      },
     },
   });
 
   const handleClose = () => {
     form.reset();
     onClose();
+    setError("");
   }
 
   const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      if (!values.fileUrl.url) {
+        setError('Attachment is required');
+        return;
+      }
+
       const url = qs.stringifyUrl({
         url: apiUrl || "",
         query
       });
 
       await axios.post(url, {
-        ...values,
-        content: values.fileUrl,  
+        content: values.fileUrl.name,  
+        fileUrl: values.fileUrl.url,
       });
       form.reset();
       router.refresh();
       handleClose();
-    } catch (error) {
+      setError("");
+    } catch (error: any) {
+      setError(error.response.data.error);
       console.log(error);
     }
   };
@@ -75,7 +93,7 @@ export const MessageFileModal = () => {
             Add an attachment
           </DialogTitle>
           <DialogDescription className="text-center text-zinc-500">
-            Send a file to your conversation
+            Send a image or pdf file to your conversation
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -91,10 +109,11 @@ export const MessageFileModal = () => {
                         <FileUpload
                           endpoint="messageFile"
                           value={field.value}
+                          setError={setError}
                           onChange={field.onChange}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>{error}</FormMessage>
                     </FormItem>
                   )}
                 />

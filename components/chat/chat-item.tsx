@@ -61,6 +61,8 @@ export const ChatItem = ({
     socketQuery
 }: ChatItemProps) => {
     const [isEditing, setIsEditing] = useState(false);
+    const [imageUrl, setImageUrl] = useState(fileUrl);
+    const [pdfUrl, setPdfUrl] = useState(fileUrl);
     const { onOpen } = useModal();
     const params = useParams();
     const router = useRouter();
@@ -73,6 +75,17 @@ export const ChatItem = ({
         router.push(`/servers/${params?.serverId}/conversations/${member.id}`);
     }
 
+    useEffect(() => {
+        if (fileUrl) {
+            fetch(fileUrl)
+                .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to load PDF file');
+                }
+                })
+                .catch(() => setPdfUrl('https://utfs.io/f/c5ecb4cd-cdcd-4ac4-8999-15e5d90659b0-o9bedv.jpg'));
+        }
+    }, [fileUrl]);
 
     useEffect(() => {
         const handleKeyDown = (event: any) => {
@@ -149,15 +162,16 @@ export const ChatItem = ({
                     </div>
                     {isImage && (
                         <a 
-                            href={fileUrl} 
+                            href={imageUrl || fileUrl} 
                             target="_blank" 
                             rel="noopener noreferrer" 
                             className="relative aspect-square rounded-md mt-2 overflow-hidden border flex items-center bg-secondary h-48 w-48"
                         >
                             <Image 
-                                src={fileUrl}
+                                src={imageUrl || fileUrl}
                                 alt={content}
                                 fill
+                                onError={() => setImageUrl(process.env.IMAGE_ERROR_URL || "https://utfs.io/f/c5ecb4cd-cdcd-4ac4-8999-15e5d90659b0-o9bedv.jpg")}
                                 className="object-cover"
                             />
                         </a>
@@ -166,12 +180,12 @@ export const ChatItem = ({
                         <div className="relative flex items-center p-2 mt-2 rounded-md dark:bg-[#2B2D31] bg-[#F2F3F5]">
                             <FileIcon className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
                             <a
-                            href={fileUrl}
+                            href={pdfUrl || fileUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="ml-2 text-sm text-indigo-500 dark:text-indigo-400 hover:underline"
                             >
-                            PDF File
+                            {content}
                             </a>
                         </div>
                     )}
