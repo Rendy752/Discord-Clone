@@ -19,6 +19,7 @@ import {
   FormControl,
   FormField,
   FormItem,
+  FormLabel,
   FormMessage,
 } from '../ui/form';
 import { Button } from '../ui/button';
@@ -26,18 +27,18 @@ import { FileUpload } from '@/components/file-upload';
 import { useRouter } from 'next/navigation';
 import { useModal } from '@/hooks/use-modal-store';
 import { useState } from 'react';
+import { Input } from '../ui/input';
 
 const formSchema = z.object({
-  fileUrl: z.object({
-    name: z.string(),
-    url: z.string(),
-  }),
+  fileUrl: z.string().min(1, { message: 'Attachment is required' }),
+  content: z.string().optional(),
 });
 
 export const MessageFileModal = () => {
   const { isOpen, onClose, type, data } = useModal();
   const router = useRouter();
   const [error, setError] = useState("");
+  const [fileName, setFileName] = useState("");
 
   const isModalOpen = isOpen && type === 'messageFile';
   const { apiUrl, query } = data;
@@ -45,10 +46,8 @@ export const MessageFileModal = () => {
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fileUrl: {
-        name: '',
-        url: '',
-      },
+      fileUrl: '',
+      content: '',
     },
   });
 
@@ -61,7 +60,7 @@ export const MessageFileModal = () => {
   const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      if (!values.fileUrl.url) {
+      if (!values.fileUrl) {
         setError('Attachment is required');
         return;
       }
@@ -72,8 +71,8 @@ export const MessageFileModal = () => {
       });
 
       await axios.post(url, {
-        content: values.fileUrl.name,  
-        fileUrl: values.fileUrl.url,
+        content: values.content || fileName,  
+        fileUrl: values.fileUrl,
       });
       form.reset();
       router.refresh();
@@ -110,6 +109,8 @@ export const MessageFileModal = () => {
                           endpoint="messageFile"
                           value={field.value}
                           setError={setError}
+                          fileName={fileName}
+                          setFileName={setFileName}
                           onChange={field.onChange}
                         />
                       </FormControl>
@@ -118,6 +119,27 @@ export const MessageFileModal = () => {
                   )}
                 />
               </div>
+
+              <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="uppercase text-xs font-bold text-zinc-500 dark:text-secondary/70">
+                      Content (optional)
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        disabled={isLoading}
+                        className="bg-zinc-300/50 border-0 focus-visible:ring-0 text-black focus-visible:ring-offset-0"
+                        placeholder="Content (optional)"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
             <DialogFooter className="bg-gray-100 px-6 py-4">
               <Button variant="primary" disabled={isLoading}>

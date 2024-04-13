@@ -4,7 +4,7 @@ import axios from 'axios';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   Dialog,
@@ -38,6 +38,7 @@ const formSchema = z.object({
 export const EditServerModal = () => {
   const { isOpen, onClose, type, data } = useModal();
   const router = useRouter();
+  const [error, setError] = useState('');
 
   const isModalOpen = isOpen && type === 'editServer';
   const { server } = data;
@@ -51,20 +52,26 @@ export const EditServerModal = () => {
   });
 
   useEffect(() => {
-    if (server) {
+    if (isModalOpen && server) {
       form.setValue('name', server.name);
       form.setValue('imageUrl', server.imageUrl);
     }
-  }, [server, form]);
+  }, [isModalOpen, server, form]);
 
   const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      if (!values.imageUrl) {
+        setError('Server image is required');
+        return;
+      }
       await axios.patch(`/api/servers/${server?.id}`, values);
       form.reset();
       router.refresh();
       onClose();
-    } catch (error) {
+      setError('');
+    } catch (error: any) {
+      setError(error.response.data.message);
       console.log(error);
     }
   };
@@ -72,6 +79,7 @@ export const EditServerModal = () => {
   const handleClose = () => {
     form.reset();
     onClose();
+    setError('');
   }
 
   return (
@@ -100,9 +108,10 @@ export const EditServerModal = () => {
                           endpoint="serverImage"
                           value={field.value}
                           onChange={field.onChange}
+                          setError={setError}
                         />
                       </FormControl>
-                      <FormMessage />
+                      <FormMessage>{error}</FormMessage>
                     </FormItem>
                   )}
                 />

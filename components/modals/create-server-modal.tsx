@@ -33,10 +33,7 @@ const formSchema = z.object({
     .string()
     .min(1, { message: 'Server name is required' })
     .max(100, { message: 'Server name must be less than 100 characters' }),
-  imageUrl: z.object({
-    name: z.string(),
-    url: z.string(),
-  }),
+  imageUrl: z.string().min(1, { message: 'Server image is required' }),
 });
 
 export const CreateServerModal = () => {
@@ -50,21 +47,18 @@ export const CreateServerModal = () => {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      imageUrl: {
-        name: '',
-        url: '',
-      },
+      imageUrl: '',
     },
   });
 
   const isLoading = form.formState.isSubmitting;
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      if (!values.imageUrl.url) {
+      if (!values.imageUrl) {
         setError('Server image is required');
         return;
       }
-      await axios.post('/api/servers', {name: values.name, imageUrl: values.imageUrl.url});
+      await axios.post('/api/servers', values);
       form.reset();
       router.refresh();
       onClose();
