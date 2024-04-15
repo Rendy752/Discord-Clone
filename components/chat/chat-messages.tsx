@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useRef, ElementRef } from "react";
+import { Fragment, useRef, ElementRef, useState } from "react";
 import { format } from "date-fns";
 import { Member, Message, Profile } from "@prisma/client";
 import { ChatWelcome } from "./chat-welcome";
@@ -47,6 +47,7 @@ export const ChatMessages = ({
 
     const topRef = useRef<ElementRef<"div">>(null);
     const bottomRef = useRef<ElementRef<"div">>(null);
+    const [editingId, setEditingId] = useState<string | null>(null);
 
     const {
         data,
@@ -126,6 +127,9 @@ export const ChatMessages = ({
                                 content={message.content}
                                 fileUrl={message.fileUrl}
                                 deleted={message.deleted}
+                                isEditing={editingId === message.id}
+                                onEdit={() => setEditingId(message.id)}
+                                onCancel={() => setEditingId(null)}
                                 timestamp={format(new Date(message.createdAt), DATE_FORMAT)}
                                 isUpdated={message.updatedAt !== message.createdAt}
                                 socketUrl={socketUrl}

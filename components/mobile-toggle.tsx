@@ -1,4 +1,4 @@
-import { Menu } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 
 import { 
     Sheet,
@@ -16,7 +16,7 @@ export const MobileToggle = ({
         <Sheet>
             <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
-                    <Menu />
+                    <ArrowLeft />
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="p-0 flex gap-0">

@@ -10,6 +10,7 @@ import Image from "next/image";
 import { UserAvatar } from "../user-avatar";
 import { ActionTooltip } from "../action-tooltip";
 import { Edit, FileIcon, ShieldAlert, ShieldCheck, Trash } from "lucide-react";
+import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/use-modal-store";
+import { on } from "events";
 
 interface ChatItemProps {
     id: string;
@@ -32,6 +34,9 @@ interface ChatItemProps {
     timestamp: string;
     fileUrl: string | null;
     deleted: boolean;
+    isEditing: boolean;
+    onEdit: () => void;
+    onCancel: () => void;
     currentMember: Member;
     isUpdated: boolean;
     socketUrl: string;
@@ -55,12 +60,14 @@ export const ChatItem = ({
     timestamp,
     fileUrl,
     deleted,
+    isEditing,
+    onEdit,
+    onCancel,
     currentMember,
     isUpdated,
     socketUrl,
     socketQuery
 }: ChatItemProps) => {
-    const [isEditing, setIsEditing] = useState(false);
     const [imageUrl, setImageUrl] = useState(fileUrl);
     const [pdfUrl, setPdfUrl] = useState(fileUrl);
     const { onOpen } = useModal();
@@ -90,7 +97,7 @@ export const ChatItem = ({
     useEffect(() => {
         const handleKeyDown = (event: any) => {
             if (event.key === "Escape" || event.keyCode === 27) {
-                setIsEditing(false);
+                onCancel()
             }
         };
 
@@ -119,7 +126,7 @@ export const ChatItem = ({
 
             await axios.patch(url, values);
             form.reset();
-            setIsEditing(false);
+            onCancel();
         } catch (error) {
             console.log(error);
         }
@@ -143,7 +150,7 @@ export const ChatItem = ({
     return (
         <div className="relative group flex items-center hover:bg-black/5 p-4 transition w-full">
             <div className="group flex gap-x-2 items-start w-full">
-                <div onClick={onMemberClick} className="cursor-pointer hover:drop-shadow-md transition">
+                <div onClick={onMemberClick} className="cursor-pointer hover:drop-shadow-md hover:scale-105 transition">
                     <UserAvatar src={member.profile.imageUrl}/>
                 </div>
                 <div className="flex flex-col w-full">
@@ -204,7 +211,10 @@ export const ChatItem = ({
                     )}
                     {!fileUrl && isEditing && (
                         <Form {...form}>
-                            <form
+                            <motion.form
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.15 }}
                                 className="flex items-center w-full gap-x-2 pt-2"
                                 onSubmit={form.handleSubmit(onSubmit)}
                             >
@@ -230,7 +240,7 @@ export const ChatItem = ({
                                 <Button disabled={isLoading} size="sm" variant="primary">
                                     Save
                                 </Button>
-                            </form>
+                            </motion.form>
                             <span className="text-[10px] mt-1 text-zinc-400">
                                 Press esc to cancel, enter to save
                             </span>
@@ -243,7 +253,7 @@ export const ChatItem = ({
                     {canEditMessage && (
                         <ActionTooltip label="Edit" side="top">
                             <Edit 
-                                onClick={() => setIsEditing(true)}
+                                onClick={() => onEdit()}
                                 className="cursor-pointer ml-auto w-4 h-4 text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition"
                             />
                         </ActionTooltip>
