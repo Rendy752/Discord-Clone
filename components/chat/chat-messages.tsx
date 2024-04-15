@@ -11,7 +11,7 @@ import { useChatQuery } from "@/hooks/use-chat-query";
 import { useChatSocket } from "@/hooks/use-chat-socket";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
 
-const DATE_FORMAT = "d MMM yyyy, HH:mm";
+const DATE_FORMAT = "d MMM yyyy, h:mm a";
 type MessageWithMemberWithProfile = Message & {
     member: Member & {
         profile: Profile;
