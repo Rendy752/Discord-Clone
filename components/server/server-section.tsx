@@ -1,53 +1,69 @@
 "use client";
 
-import { ServerWithMembersWithProfiles } from "@/types";
-import { ChannelType, MemberRole } from "@prisma/client";
-import { ActionTooltip } from "../action-tooltip";
-import { Plus, Settings } from "lucide-react";
-import { useModal } from "@/hooks/use-modal-store";
+import { Channel, ChannelType, MemberRole, Server, Member, Profile } from "@prisma/client";
+import { ServerSectionHeader } from "./server-section-header";
+import { ServerChannel } from "./server-channel";
+import { useParams } from "next/navigation";
+import { useState } from "react";
+import { ServerMember } from "./server-member";
+
 
 interface ServerSectionProps {
-    label: string;
-    role?: MemberRole;
-    sectionType: "channels" | "members";
-    channelType?: ChannelType;
-    server?: ServerWithMembersWithProfiles;
+  contents: (Channel | (Member & { profile: Profile }))[];
+  server: Server;
+  role?: MemberRole;
+  label: string;
+  sectionType: "channels" | "members",
+  channelType?: ChannelType;
 }
 
 export const ServerSection = ({
-    label,
-    role,
-    sectionType,
-    channelType,
-    server,
+  contents,
+  server,
+  role,
+  label,
+  sectionType,
+  channelType,
 }: ServerSectionProps) => {
-    const { onOpen } = useModal();
+    const params = useParams();
+    const [isCollapsed, setIsCollapsed] = useState(false);
 
     return (
-        <div className="flex items-center justify-between py-2">
-            <p className="text-xs uppercase font-semibold text-zinc-500 dark:text-zinc-400">
-                {label}
-            </p>
-            {role !==MemberRole.GUEST && sectionType == "channels" && (
-                <ActionTooltip label="Create Channel" side="top">
-                    <button 
-                        onClick={() => onOpen("createChannel", { channelType })}
-                        className="text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300 transition"
-                    >
-                        <Plus className="w-4 h-4" />
-                    </button>
-                </ActionTooltip>
-            )}
-            {role === MemberRole.ADMIN && sectionType === "members" && (
-                <ActionTooltip label="Manage Members" side="top">
-                    <button 
-                        onClick={() => onOpen("members", { server })}
-                        className="text-zinc-500 hover:text-zinc-600 dark:text-zinc-400 dark:hover:text-zinc-300 transition"
-                    >
-                        <Settings className="w-4 h-4" />
-                    </button>
-                </ActionTooltip>
-            )}
+        <div className="flex flex-col gap-1 mb-2">
+            <ServerSectionHeader
+                sectionType={sectionType}
+                channelType={channelType}
+                role={role}
+                label={label}
+                isCollapsed={isCollapsed}
+                onToggle={() => setIsCollapsed(!isCollapsed)}
+            />
+            <div className="px-2">
+                {sectionType === "channels" && (
+                    contents.map((content) => (
+                    (!isCollapsed || params?.channelId === content.id) && (
+                        <ServerChannel 
+                        key={content.id}
+                        channel={content as Channel}
+                        role={role}
+                        server={server}
+                        />
+                    )
+                    ))
+                )}
+
+                {sectionType === "members" && (
+                    contents.map((content) => (
+                    (!isCollapsed || params?.memberId === content.id) && (
+                        <ServerMember 
+                        key={content.id}
+                        member={content as Member & { profile: Profile }}
+                        server={server}
+                        />
+                    )
+                    ))
+                )}
+            </div>
         </div>
     );
-}
+};

@@ -34,7 +34,7 @@ export const ServerMember = ({
         <button 
             onClick={onRedirect}
             className={cn(
-                "group px-2 py-2 rounded-md flex items-center gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition mb-1",
+                "group px-2 py-2 rounded-xl flex items-center gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition mb-1",
                 params?.memberId === member.id && "bg-zinc-700/20 dark:bg-zinc-700"
             )}>
             <UserAvatar 
