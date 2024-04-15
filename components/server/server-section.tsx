@@ -58,7 +58,6 @@ export const ServerSection = ({
                         <ServerMember 
                         key={content.id}
                         member={content as Member & { profile: Profile }}
-                        server={server}
                         />
                     )
                     ))

@@ -177,7 +177,9 @@ export const ChatItem = ({
                                 src={imageUrl || fileUrl}
                                 alt={content}
                                 fill
+                                priority
                                 onError={() => setImageUrl(process.env.IMAGE_ERROR_URL || "https://utfs.io/f/c5ecb4cd-cdcd-4ac4-8999-15e5d90659b0-o9bedv.jpg")}
+                                sizes="48"
                                 className="object-cover"
                             />
                         </a>

@@ -26,6 +26,8 @@ const ChannelIdPage = async ({
         return redirectToSignIn();
     }
 
+    const profileId = profile.id;
+
     const channel = await db.channel.findUnique({
         where: {
             id: params.channelId
@@ -54,6 +56,7 @@ const ChannelIdPage = async ({
                 <>
                     <ChatMessages 
                         member={member}
+                        profileId={profileId}
                         name={channel.name}
                         chatId={channel.id}
                         type="channel"

@@ -8,6 +8,26 @@ export default async function handler (
     req: NextApiRequest,
     res: NextApiResponseServerIo
 ) {
+    if (req.method === "GET") {
+        try {
+            const profile = await currentProfilePages(req);
+
+            if (!profile) {
+                return res.status(401).json({ error: "Unauthorized" });
+            }
+
+            const { channelId } = req.query;
+
+            const typingKey = `chat:${channelId}:typing`;
+            res?.socket?.server?.io?.emit(typingKey, profile.name, profile.id);
+
+            return res.status(200).json({ message: "Typing event sent" });
+        } catch (error) {
+            console.log("[MESSAGES_GET]", error);
+            return res.status(500).json({ message: "Internal server error" });
+        }
+    }
+
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" });
     }

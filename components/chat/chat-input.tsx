@@ -5,7 +5,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import qs from "query-string";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 
 import {
     Form,
@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import { useModal } from "@/hooks/use-modal-store";
 import { EmojiPicker } from "../emoji-picker";
+import { useRef } from "react";
 
 interface ChatInputProps {
     apiUrl: string;
@@ -33,10 +34,11 @@ export const ChatInput = ({
     apiUrl,
     query,
     name,
-    type
+    type,
 }: ChatInputProps) => {
     const { onOpen } = useModal();
     const router = useRouter();
+    const params = useParams();
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -63,6 +65,31 @@ export const ChatInput = ({
         }
     }
 
+
+    
+
+    const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+    const handleKeyDown = async () => {
+        if (params) {
+            if (debounceTimeout.current) {
+                clearTimeout(debounceTimeout.current);
+            }
+        
+            debounceTimeout.current = setTimeout(async () => {
+            try {
+                const url = qs.stringifyUrl({
+                    url: apiUrl,
+                    query
+                });
+        
+                await axios.get(url);
+                } catch (error) {
+                    console.error(error);
+                }
+            }, 3000);
+        }
+    };
+
     return (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
@@ -78,9 +105,10 @@ export const ChatInput = ({
                                         onClick={() => onOpen("messageFile", { apiUrl, query })}
                                         className="absolute top-7 left-8 h-[24px] w-[24px] bg-zinc-500 dark:bg-zinc-400 hover:bg-zinc-600 dark:hover:bg-zinc-300 transition rounded-full p-1 flex items-center justify-center"
                                     >
-                                      <Plus className="text-white dark:text-[#313338]" />  
+                                      <Plus className="text-white dark:text-[#313338]" />
                                     </button>
                                     <Input
+                                        onKeyDown={handleKeyDown}
                                         disabled={isLoading}
                                         className="px-14 py-6 bg-zinc-200/90 dark:bg-zinc-700/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
                                         placeholder={`Message ${type === "conversation" ? name : "#" + name}`}

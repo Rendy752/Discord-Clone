@@ -1,10 +1,12 @@
 "use client";
 
 import { Fragment, useRef, ElementRef, useState } from "react";
-import { differenceInCalendarDays, format, parse } from "date-fns";
+import { format } from "date-fns";
 import { Member, Message, Profile } from "@prisma/client";
 import { ChatWelcome } from "./chat-welcome";
 import { Loader2, ServerCrash } from "lucide-react";
+import BeatLoader from "react-spinners/BeatLoader";
+import { motion } from "framer-motion";
 import { ChatItem } from "./chat-item";
 
 import { useChatQuery } from "@/hooks/use-chat-query";
@@ -22,6 +24,7 @@ type MessageWithMemberWithProfile = Message & {
 interface ChatMessagesProps {
     name: string;
     member: Member;
+    profileId: string;
     chatId: string;
     apiUrl: string;
     socketUrl: string;
@@ -34,6 +37,7 @@ interface ChatMessagesProps {
 export const ChatMessages = ({
     name,
     member,
+    profileId,
     chatId,
     apiUrl,
     socketUrl,
@@ -45,6 +49,7 @@ export const ChatMessages = ({
     const queryKey = `chat:${chatId}`;
     const addKey = `chat:${chatId}:messages`;
     const updateKey = `chat:${chatId}:messages:update`;
+    const typingKey = `chat:${chatId}:typing`;
 
     const topRef = useRef<ElementRef<"div">>(null);
     const bottomRef = useRef<ElementRef<"div">>(null);
@@ -62,7 +67,8 @@ export const ChatMessages = ({
         paramKey,
         paramValue
     })
-    useChatSocket({ queryKey, addKey, updateKey });
+
+    const { isTyping, userName, userId } = useChatSocket({ queryKey, addKey, updateKey, typingKey});
     useChatScroll({
         topRef,
         bottomRef,
@@ -161,6 +167,19 @@ export const ChatMessages = ({
                     </Fragment>
                 ))}
             </div>
+            {isTyping && profileId !== userId && (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 20 }}
+                    transition={{ duration: 0.1 }}
+                    className="bg-white dark:bg-[#313338] fixed bottom-20 md:bottom-0 w-full flex items-center py-1 px-4">
+                    <BeatLoader size={8} color={"#1E1F22"} loading={isTyping} />
+                    <p className="text-xs text-zinc-600 dark:text-zinc-300 ml-2">
+                        {userName} is typing...
+                    </p>
+                </motion.div>
+            )}
             <div ref={bottomRef} />
         </div>
     )

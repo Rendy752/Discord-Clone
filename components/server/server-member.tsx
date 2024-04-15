@@ -8,7 +8,6 @@ import { UserAvatar } from "../user-avatar";
 
 interface ServerMemberProps {
     member: Member & { profile: Profile };
-    server: Server;
 }
 
 const roleIconMap = {
@@ -19,7 +18,6 @@ const roleIconMap = {
 
 export const ServerMember = ({
     member,
-    server
 }: ServerMemberProps) => {
     const params = useParams();
     const router = useRouter();

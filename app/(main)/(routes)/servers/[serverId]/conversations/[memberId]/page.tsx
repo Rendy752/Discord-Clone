@@ -29,6 +29,8 @@ const MemberIdPage = async ({
         return redirectToSignIn();
     }
 
+    const profileId = profile.id;
+
     const currentMember = await db.member.findFirst({
         where: {
             serverId: params.serverId,
@@ -66,6 +68,7 @@ const MemberIdPage = async ({
                     <ChatMessages 
                         member={currentMember}
                         name={otherMember.profile?.name !== "null null" ? otherMember.profile?.name : "Anonymous"}
+                        profileId={profileId}
                         chatId={conversation.id}
                         type="conversation"
                         apiUrl="/api/direct-messages"

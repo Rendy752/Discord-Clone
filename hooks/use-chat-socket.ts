@@ -2,12 +2,13 @@ import { useSocket } from "@/components/providers/socket-provider";
 import { Member, Message, Profile } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 type ChatSocketProps = {
     addKey: string;
     updateKey: string;
     queryKey: string;
+    typingKey: string;
 }
 
 type MessageWithMemberWithProfile = Message & {
@@ -19,11 +20,15 @@ type MessageWithMemberWithProfile = Message & {
 export const useChatSocket = ({
     addKey,
     updateKey,
-    queryKey
+    queryKey,
+    typingKey,
 }: ChatSocketProps) => {
     const { socket } = useSocket();
     const queryClient = useQueryClient();
-
+    const [isTyping, setIsTyping] = useState(false);
+    const [userName, setUserName] = useState("");
+    const [userId, setUserId] = useState("");
+      
     useEffect(() => {
         if (!socket) {
             return;
@@ -74,6 +79,8 @@ export const useChatSocket = ({
                     ]
                 }
 
+                setIsTyping(false);
+
                 return {
                     ...oldData,
                     pages: newData,
@@ -81,9 +88,28 @@ export const useChatSocket = ({
             });
         });
 
+        socket.on(typingKey, (userName: string, userId: string) => {
+            setIsTyping(true);
+            setUserName(userName !== "null null" ? userName : "Anonymous");
+            setUserId(userId);
+
+            setTimeout(() => {
+                setIsTyping(false);
+                setUserName("");
+                setUserId("");
+            }, 10000);
+        });
+
         return () => {
             socket.off(addKey);
             socket.off(updateKey);
+            socket.off(typingKey);
         }
-    }, [queryClient, addKey, queryKey, socket, updateKey])
+    }, [queryClient, addKey, queryKey, socket, updateKey, typingKey, isTyping])
+
+    return {
+        isTyping,
+        userName,
+        userId,
+    }
 }
