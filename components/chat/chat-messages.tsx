@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useRef, ElementRef, useState } from "react";
-import { format } from "date-fns";
+import { differenceInCalendarDays, format, parse } from "date-fns";
 import { Member, Message, Profile } from "@prisma/client";
 import { ChatWelcome } from "./chat-welcome";
 import { Loader2, ServerCrash } from "lucide-react";
@@ -12,6 +12,7 @@ import { useChatSocket } from "@/hooks/use-chat-socket";
 import { useChatScroll } from "@/hooks/use-chat-scroll";
 
 const DATE_FORMAT = "d MMM yyyy, h:mm a";
+const SEPARATOR_DATE_FORMAT = 'MMM d, yyyy';
 type MessageWithMemberWithProfile = Message & {
     member: Member & {
         profile: Profile;
@@ -118,7 +119,26 @@ export const ChatMessages = ({
             <div className="flex flex-col-reverse mt-auto">
                 {data?.pages?.map((group, index) => (
                     <Fragment key={index}>
-                        {group?.items?.map((message: MessageWithMemberWithProfile) => (
+                        {group?.items?.map((message: MessageWithMemberWithProfile, messageIndex: number) => {
+                            const timestamp = new Date(message.createdAt);
+                            const prevTimestamp = messageIndex > 0 ? new Date(group.items[messageIndex - 1].createdAt) : null;
+                            
+                            const isNewDay = prevTimestamp 
+                              && (timestamp.getDate() !== prevTimestamp.getDate() 
+                              || timestamp.getMonth() !== prevTimestamp.getMonth() 
+                              || timestamp.getFullYear() !== prevTimestamp.getFullYear());
+                      
+                            return (
+                            <Fragment key={message.id}>
+                                {isNewDay && 
+                                    <div className="flex items-center justify-center my-2 mx-4">
+                                        <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700"></div>
+                                        <span className="px-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                            {`The end for ${format(timestamp, SEPARATOR_DATE_FORMAT)}`}
+                                        </span>
+                                        <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700"></div>
+                                    </div>
+                                }
                             <ChatItem 
                                 key={message.id}
                                 id={message.id}
@@ -134,8 +154,10 @@ export const ChatMessages = ({
                                 isUpdated={message.updatedAt !== message.createdAt}
                                 socketUrl={socketUrl}
                                 socketQuery={socketQuery}
-                            />
-                        ))}
+                                />
+                            </Fragment>
+                        )
+                        })}
                     </Fragment>
                 ))}
             </div>
