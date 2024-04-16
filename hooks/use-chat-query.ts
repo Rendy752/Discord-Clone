@@ -2,6 +2,7 @@ import qs from "query-string";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
 import { useSocket } from "@/components/providers/socket-provider";
+import { Message } from "@prisma/client";
 
 interface ChatQueryProps {
     queryKey: string;
@@ -18,17 +19,24 @@ export const useChatQuery = ({
 }: ChatQueryProps) => {
     const { isConnected } = useSocket();
 
+    let page: number = 1;
+
     const fetchMessages = async ({ pageParam = undefined }) => {     
         const url = qs.stringifyUrl({
             url: apiUrl,
             query: {
                 cursor: pageParam,
-                [paramKey]: paramValue
+                [paramKey]: paramValue,
+                page,
             }
         }, { skipNull: true });
 
         const response = await fetch(url);
-        return response.json();
+        const data = await response.json();
+
+        page++;
+
+        return data;
     }
 
     const {

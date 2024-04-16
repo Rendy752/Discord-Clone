@@ -15,10 +15,13 @@ import { useChatScroll } from "@/hooks/use-chat-scroll";
 
 const DATE_FORMAT = "d MMM yyyy, h:mm a";
 const SEPARATOR_DATE_FORMAT = 'MMM d, yyyy';
+
 type MessageWithMemberWithProfile = Message & {
     member: Member & {
         profile: Profile;
     };
+    prevMessage: Message | null;
+    nextMessage: Message | null;
 };
 
 interface ChatMessagesProps {
@@ -99,6 +102,7 @@ export const ChatMessages = ({
         )
     }
 
+    console.log(data);
     return (
         <div ref={topRef} className="flex-1 flex flex-col py-4 overflow-y-auto">
             {!hasNextPage && <div className="flex-1" />}
@@ -126,41 +130,47 @@ export const ChatMessages = ({
                 {data?.pages?.map((group, index) => (
                     <Fragment key={index}>
                         {group?.items?.map((message: MessageWithMemberWithProfile, messageIndex: number) => {
+                            console.log(message)
                             const timestamp = new Date(message.createdAt);
-                            const prevTimestamp = messageIndex > 0 ? new Date(group.items[messageIndex - 1].createdAt) : null;
+                            const prevTimestamp = message.prevMessage?.createdAt ? new Date(message.prevMessage.createdAt) : null;
                             
-                            const isNewDay = prevTimestamp 
-                              && (timestamp.getDate() !== prevTimestamp.getDate() 
-                              || timestamp.getMonth() !== prevTimestamp.getMonth() 
-                              || timestamp.getFullYear() !== prevTimestamp.getFullYear());
+                            const isNewDay = timestamp.getDate() !== prevTimestamp?.getDate() ||
+                              timestamp.getMonth() !== prevTimestamp?.getMonth() ||
+                              timestamp.getFullYear() !== prevTimestamp?.getFullYear();
                       
+                            console.log(message.content, message.prevMessage?.content, message.nextMessage?.content, isNewDay)
                             return (
                             <Fragment key={message.id}>
-                                {isNewDay && 
+                                {isNewDay || prevTimestamp === null && 
                                     <div className="flex items-center justify-center my-2 mx-4">
                                         <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700"></div>
                                         <span className="px-2 text-xs text-zinc-500 dark:text-zinc-400">
-                                            {`The end for ${format(timestamp, SEPARATOR_DATE_FORMAT)}`}
+                                            {format(timestamp, SEPARATOR_DATE_FORMAT)}
                                         </span>
                                         <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700"></div>
                                     </div>
                                 }
-                            <ChatItem 
-                                key={message.id}
-                                id={message.id}
-                                currentMember={member}
-                                member={message.member}
-                                content={message.content}
-                                fileUrl={message.fileUrl}
-                                deleted={message.deleted}
-                                isEditing={editingId === message.id}
-                                onEdit={() => setEditingId(message.id)}
-                                onCancel={() => setEditingId(null)}
-                                timestamp={format(new Date(message.createdAt), DATE_FORMAT)}
-                                isUpdated={message.updatedAt !== message.createdAt}
-                                socketUrl={socketUrl}
-                                socketQuery={socketQuery}
+                                
+                                <ChatItem 
+                                    key={message.id}
+                                    id={message.id}
+                                    currentMember={member}
+                                    member={message.member}
+                                    content={message.content}
+                                    fileUrl={message.fileUrl}
+                                    deleted={message.deleted}
+                                    isEditing={editingId === message.id}
+                                    onEdit={() => setEditingId(message.id)}
+                                    onCancel={() => setEditingId(null)}
+                                    timestamp={format(new Date(message.createdAt), DATE_FORMAT)}
+                                    isUpdated={message.updatedAt !== message.createdAt}
+                                    socketUrl={socketUrl}
+                                    socketQuery={socketQuery}
                                 />
+                                <div className="flex gap-5">
+                                    <div>{message.prevMessage?.content}</div>
+                                    <div>{message.nextMessage?.content}</div>
+                                </div>
                             </Fragment>
                         )
                         })}
