@@ -23,6 +23,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useModal } from "@/hooks/use-modal-store";
+import { format, isToday, isYesterday } from "date-fns";
 
 interface ChatItemProps {
     id: string;
@@ -72,6 +73,18 @@ export const ChatItem = ({
     const { onOpen } = useModal();
     const params = useParams();
     const router = useRouter();
+
+    const formatTimeStamp = (timestamp: string) => {
+        const date = new Date(timestamp);
+        
+        if (isToday(date)) {
+            return `Today at ${format(date, 'h:mm a')}`;
+        } else if (isYesterday(date)) {
+            return `Yesterday at ${format(date, 'h:mm a')}`;
+        } else {
+            return format(date, 'dd MMM yyyy, h:mm a');
+        }
+    }
 
     const onMemberClick = () => {
         if (member.id === currentMember.id) {
@@ -163,7 +176,7 @@ export const ChatItem = ({
                             </ActionTooltip>
                         </div>
                         <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                            {timestamp}
+                            {formatTimeStamp(timestamp)}
                         </span>
                     </div>
                     {isImage && (

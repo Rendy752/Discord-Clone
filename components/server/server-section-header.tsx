@@ -30,7 +30,7 @@ export const ServerSectionHeader = ({
     return (
         <div 
             onClick={onToggle}
-            className="flex items-center justify-between p-1 rounded-2xl hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition"
+            className="flex items-center justify-between p-1 rounded-2xl hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 cursor-pointer transition"
         >
             <div className="flex items-center gap-1">
                 {isCollapsed ? <ChevronRight className="w-3 h-3 text-zinc-500 dark:text-zinc-400" /> : <ChevronDown className="w-3 h-3 text-zinc-500 dark:text-zinc-400" />}

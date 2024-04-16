@@ -99,7 +99,7 @@ export const ChatInput = ({
                     render={({ field }) => (
                         <FormItem>
                             <FormControl>
-                                <div className="relative p-4 pb-6">
+                                <div className="relative p-4 pb-6 border-t border-zinc-200 dark:border-zinc-700">
                                     <button 
                                         type="button"
                                         onClick={() => onOpen("messageFile", { apiUrl, query })}
