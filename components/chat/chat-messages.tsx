@@ -129,8 +129,7 @@ export const ChatMessages = ({
             <div className="flex flex-col-reverse mt-auto">
                 {data?.pages?.map((group, index) => (
                     <Fragment key={index}>
-                        {group?.items?.map((message: MessageWithMemberWithProfile, messageIndex: number) => {
-                            console.log(message)
+                        {group?.items?.map((message: MessageWithMemberWithProfile) => {
                             const timestamp = new Date(message.createdAt);
                             const prevTimestamp = message.prevMessage?.createdAt ? new Date(message.prevMessage.createdAt) : null;
                             
@@ -138,23 +137,14 @@ export const ChatMessages = ({
                               timestamp.getMonth() !== prevTimestamp?.getMonth() ||
                               timestamp.getFullYear() !== prevTimestamp?.getFullYear();
                       
-                            console.log(message.content, message.prevMessage?.content, message.nextMessage?.content, isNewDay)
                             return (
-                            <Fragment key={message.id}>
-                                {isNewDay || prevTimestamp === null && 
-                                    <div className="flex items-center justify-center my-2 mx-4">
-                                        <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700"></div>
-                                        <span className="px-2 text-xs text-zinc-500 dark:text-zinc-400">
-                                            {format(timestamp, SEPARATOR_DATE_FORMAT)}
-                                        </span>
-                                        <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700"></div>
-                                    </div>
-                                }
-                                
+                            <Fragment key={message.id}>                
                                 <ChatItem 
                                     key={message.id}
                                     id={message.id}
                                     currentMember={member}
+                                    isSamePreviousMember={message.prevMessage?.memberId === message.memberId}
+                                    timeDifferenceInMinute={Math.round((timestamp.getTime() - (prevTimestamp?.getTime() || 0)) / 60000)}
                                     member={message.member}
                                     content={message.content}
                                     fileUrl={message.fileUrl}
@@ -167,10 +157,15 @@ export const ChatMessages = ({
                                     socketUrl={socketUrl}
                                     socketQuery={socketQuery}
                                 />
-                                <div className="flex gap-5">
-                                    <div>{message.prevMessage?.content}</div>
-                                    <div>{message.nextMessage?.content}</div>
-                                </div>
+                                { isNewDay && 
+                                    <div className="flex items-center justify-center my-2 mx-4">
+                                        <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700"></div>
+                                        <span className="px-2 text-xs text-zinc-500 dark:text-zinc-400">
+                                            {format(timestamp, SEPARATOR_DATE_FORMAT)}
+                                        </span>
+                                        <div className="flex-1 border-t border-zinc-200 dark:border-zinc-700"></div>
+                                    </div>
+                                }
                             </Fragment>
                         )
                         })}

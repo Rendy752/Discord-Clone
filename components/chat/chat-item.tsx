@@ -38,6 +38,8 @@ interface ChatItemProps {
     onEdit: () => void;
     onCancel: () => void;
     currentMember: Member;
+    isSamePreviousMember: boolean;
+    timeDifferenceInMinute: number;
     isUpdated: boolean;
     socketUrl: string;
     socketQuery: Record<string, string>;
@@ -64,6 +66,8 @@ export const ChatItem = ({
     onEdit,
     onCancel,
     currentMember,
+    isSamePreviousMember,
+    timeDifferenceInMinute,
     isUpdated,
     socketUrl,
     socketQuery
@@ -158,33 +162,46 @@ export const ChatItem = ({
     const canEditMessage = !deleted && isOwner && !fileUrl;
     const isPDF = fileType === "pdf" && fileUrl;
     const isImage = !isPDF && fileUrl;
+    const isNewMessageHeader = (!isSamePreviousMember || (!isSamePreviousMember || timeDifferenceInMinute > 5));
 
     return (
-        <div className="relative group flex items-center hover:bg-black/5 p-4 transition w-full">
+        <div 
+            className={cn(
+                "relative group flex items-center hover:bg-black/5 my-0 px-4 py-1 transition w-full",
+                isNewMessageHeader && "mt-4"
+            )}>
             <div className="group flex gap-x-2 items-start w-full">
-                <div onClick={onMemberClick} className="cursor-pointer hover:drop-shadow-md hover:scale-105 transition">
-                    <UserAvatar src={member.profile.imageUrl}/>
-                </div>
-                <div className="flex flex-col w-full">
-                    <div className="flex items-center gap-x-2">
-                        <div className="flex items-center gap-x-2">
-                            <p onClick={onMemberClick} className="font-semibold text-sm hover:underline cursor-pointer">
-                                {member.profile.name !== "null null" ? member.profile.name : "Anonymous"}
-                            </p>  
-                            <ActionTooltip label={member.role}>
-                                {roleIconMap[member.role]}
-                            </ActionTooltip>
-                        </div>
-                        <span className="text-xs text-zinc-500 dark:text-zinc-400">
-                            {formatTimeStamp(timestamp)}
-                        </span>
+                {isNewMessageHeader && (
+                    <div onClick={onMemberClick} className="cursor-pointer hover:drop-shadow-md hover:scale-105 transition">
+                        <UserAvatar src={member.profile.imageUrl}/>
                     </div>
+                )}
+                <div 
+                    className={cn(
+                        "flex flex-col w-full",
+                        !isNewMessageHeader && "pl-9 md:pl-12"
+                    )}>
+                    {isNewMessageHeader && (
+                        <div className="flex items-center gap-x-2">
+                            <div className="flex items-center gap-x-2">
+                                <p onClick={onMemberClick} className="font-semibold text-sm hover:underline cursor-pointer">
+                                    {member.profile.name !== "null null" ? member.profile.name : "Anonymous"}
+                                </p>  
+                                <ActionTooltip label={member.role}>
+                                    {roleIconMap[member.role]}
+                                </ActionTooltip>
+                            </div>
+                            <span className="text-xs text-zinc-500 dark:text-zinc-400">
+                                {formatTimeStamp(timestamp)}
+                            </span>
+                        </div>
+                    )}
                     {isImage && (
                         <a 
                             href={imageUrl || fileUrl} 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="relative aspect-square rounded-md mt-2 overflow-hidden border flex items-center bg-secondary h-48 w-48"
+                            className="relative aspect-square rounded-md my-1 overflow-hidden border flex items-center bg-secondary h-48 w-48"
                         >
                             <Image 
                                 src={imageUrl || fileUrl}
@@ -198,7 +215,7 @@ export const ChatItem = ({
                         </a>
                     )}
                     {isPDF && (
-                        <div className="relative flex items-center p-2 mt-2 rounded-md dark:bg-[#2B2D31] bg-[#F2F3F5]">
+                        <div className="relative flex items-center p-2 my-2 rounded-md dark:bg-[#2B2D31] bg-[#F2F3F5]">
                             <FileIcon className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
                             <a
                             href={pdfUrl || fileUrl}
