@@ -40,6 +40,7 @@ interface ChatItemProps {
     currentMember: Member;
     isSamePreviousMember: boolean;
     timeDifferenceInMinute: number;
+    isNewDay: boolean;
     isUpdated: boolean;
     socketUrl: string;
     socketQuery: Record<string, string>;
@@ -68,6 +69,7 @@ export const ChatItem = ({
     currentMember,
     isSamePreviousMember,
     timeDifferenceInMinute,
+    isNewDay,
     isUpdated,
     socketUrl,
     socketQuery
@@ -162,7 +164,7 @@ export const ChatItem = ({
     const canEditMessage = !deleted && isOwner && !fileUrl;
     const isPDF = fileType === "pdf" && fileUrl;
     const isImage = !isPDF && fileUrl;
-    const isNewMessageHeader = (!isSamePreviousMember || (!isSamePreviousMember || timeDifferenceInMinute > 5));
+    const isNewMessageHeader = (!isSamePreviousMember || (!isSamePreviousMember || timeDifferenceInMinute > 5)) || isNewDay;
 
     return (
         <div 
@@ -215,7 +217,7 @@ export const ChatItem = ({
                         </a>
                     )}
                     {isPDF && (
-                        <div className="relative flex items-center p-2 my-2 rounded-md dark:bg-[#2B2D31] bg-[#F2F3F5]">
+                        <div className="relative flex items-center p-2 my-2 rounded-md dark:bg-[#2B2D31] bg-[#E3E5E8]">
                             <FileIcon className="h-10 w-10 fill-indigo-200 stroke-indigo-400" />
                             <a
                             href={pdfUrl || fileUrl}

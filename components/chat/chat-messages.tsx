@@ -145,6 +145,7 @@ export const ChatMessages = ({
                                     currentMember={member}
                                     isSamePreviousMember={message.prevMessage?.memberId === message.memberId}
                                     timeDifferenceInMinute={Math.round((timestamp.getTime() - (prevTimestamp?.getTime() || 0)) / 60000)}
+                                    isNewDay={isNewDay}
                                     member={message.member}
                                     content={message.content}
                                     fileUrl={message.fileUrl}
