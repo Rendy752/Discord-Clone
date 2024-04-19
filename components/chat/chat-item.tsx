@@ -79,6 +79,17 @@ export const ChatItem = ({
     const { onOpen } = useModal();
     const params = useParams();
     const router = useRouter();
+    const [isEmoji, setIsEmoji] = useState(false);
+
+    useEffect(() => {
+        const emojiRegex = /^[\p{Emoji_Presentation}]\s*$/u;
+    
+        if (emojiRegex.test(content.trim())) {
+            setIsEmoji(true);
+        } else {
+            setIsEmoji(false);
+        }
+    }, [content]);
 
     const formatTimeStamp = (timestamp: string) => {
         const date = new Date(timestamp);
@@ -232,6 +243,7 @@ export const ChatItem = ({
                     {!fileUrl && !isEditing && (
                         <p className={cn(
                             "text-sm text-zinc-600 dark:text-zinc-300",
+                            isEmoji && "text-7xl",
                             deleted && "italic text-zinc-500 dark:text-zinc-400 text-xs mt-1"
                         )}>
                             {content}

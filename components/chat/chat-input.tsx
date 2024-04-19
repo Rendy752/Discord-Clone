@@ -65,9 +65,6 @@ export const ChatInput = ({
         }
     }
 
-
-    
-
     const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
     const handleKeyDown = async () => {
         if (params) {
@@ -124,7 +121,6 @@ export const ChatInput = ({
                         </FormItem>
                     )}
                 >
-
                 </FormField>
             </form>
         </Form>
