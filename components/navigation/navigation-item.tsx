@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 import { ActionTooltip } from "../action-tooltip";
 
 interface NavigationItemProps {
@@ -22,7 +23,13 @@ export const NavigationItem = ({ id, imageUrl, name }: NavigationItemProps) => {
 
     return (
         <ActionTooltip label={name}>
-            <button
+            <motion.button
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.2 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={onClick}
                 className="group relative flex items-center"
             >
@@ -40,7 +47,7 @@ export const NavigationItem = ({ id, imageUrl, name }: NavigationItemProps) => {
                         alt={name}
                     />
                 </div>
-            </button>
+            </motion.button>
         </ActionTooltip>
     );
 }

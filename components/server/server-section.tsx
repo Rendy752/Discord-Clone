@@ -40,24 +40,26 @@ export const ServerSection = ({
             />
             <div className="px-2">
                 {sectionType === "channels" && (
-                    contents.map((content) => (
+                    contents.map((content, index) => (
                     (!isCollapsed || params?.channelId === content.id) && (
                         <ServerChannel 
-                        key={content.id}
-                        channel={content as Channel}
-                        role={role}
-                        server={server}
+                            key={content.id}
+                            index={(index + 1) * 2}
+                            channel={content as Channel}
+                            role={role}
+                            server={server}
                         />
                     )
                     ))
                 )}
 
                 {sectionType === "members" && (
-                    contents.map((content) => (
+                    contents.map((content, index) => (
                     (!isCollapsed || params?.memberId === content.id) && (
                         <ServerMember 
-                        key={content.id}
-                        member={content as Member & { profile: Profile }}
+                            key={content.id}
+                            index={(index + 1) * 2}
+                            member={content as Member & { profile: Profile }}
                         />
                     )
                     ))

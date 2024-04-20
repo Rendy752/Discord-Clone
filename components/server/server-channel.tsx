@@ -7,8 +7,10 @@ import { useParams, useRouter } from "next/navigation";
 import { ActionTooltip } from "../action-tooltip";
 import { ModalType, useModal } from "@/hooks/use-modal-store";
 import React from "react";
+import { motion } from "framer-motion";
 
 interface ServerChannelProps {
+    index: number;
     channel: Channel;
     server: Server;
     role?: MemberRole
@@ -21,6 +23,7 @@ const iconMap = {
 }
 
 export const ServerChannel = ({
+    index,
     channel,
     server,
     role
@@ -41,7 +44,11 @@ export const ServerChannel = ({
     }
 
     return (
-        <button
+        <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: `0.${index}` }}
             onClick={onRedirect}
             className={cn(
                 "group px-2 py-2 rounded-xl flex items-center gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition mb-1",
@@ -74,6 +81,6 @@ export const ServerChannel = ({
             {channel.name === "general" && (
                 <Lock className="ml-auto w-4 h-4 text-zinc-500 dark:text-zinc-400" />
             )}
-        </button>
+        </motion.button>
     );
 }

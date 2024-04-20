@@ -4,6 +4,7 @@ import { ServerWithMembersWithProfiles } from "@/types";
 import { MemberRole } from "@prisma/client";
 import { ChevronDown, LogOut, PlusCircle, Settings, Trash, UserPlus, Users } from "lucide-react";
 
+import { motion } from "framer-motion";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { useModal } from "@/hooks/use-modal-store";
 
@@ -25,7 +26,15 @@ export const ServerHeader = ({
         <DropdownMenu>
             <DropdownMenuTrigger className="focus:outline-none" asChild>
                 <button className="w-full text-md font-semibold px-3 flex items-center h-12 border-neutral-200 dark:border-neutral-800 border-b-2 hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition">
-                    <p className="line-clamp-1 text-start">{server.name}</p>
+                    <motion.p 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.2 }}
+                        exit={{ opacity: 0, x: -10 }}
+                        className="line-clamp-1 text-start"
+                    >
+                        {server.name}
+                    </motion.p>
                     <ChevronDown className="h-5 w-5 ml-auto" />
                 </button>
             </DropdownMenuTrigger>

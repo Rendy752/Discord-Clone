@@ -1,12 +1,13 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { Member, MemberRole, Profile, Server } from "@prisma/client";
+import { Member, MemberRole, Profile } from "@prisma/client";
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { UserAvatar } from "../user-avatar";
-
+import { motion } from "framer-motion";
 interface ServerMemberProps {
+    index: number;
     member: Member & { profile: Profile };
 }
 
@@ -17,6 +18,7 @@ const roleIconMap = {
 }
 
 export const ServerMember = ({
+    index,
     member,
 }: ServerMemberProps) => {
     const params = useParams();
@@ -29,7 +31,11 @@ export const ServerMember = ({
     }
 
     return (
-        <button 
+        <motion.button 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: `0.${index}` }}
             onClick={onRedirect}
             className={cn(
                 "group px-2 py-2 rounded-xl flex items-center gap-x-2 w-full hover:bg-zinc-700/10 dark:hover:bg-zinc-700/50 transition mb-1",
@@ -48,6 +54,6 @@ export const ServerMember = ({
                 {member.profile.name !== "null null" ? member.profile.name : 'Anonymous'}
             </p>
             {icon}
-        </button>
+        </motion.button>
     );
 }
