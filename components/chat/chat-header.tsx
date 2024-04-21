@@ -3,6 +3,7 @@ import { MobileToggle } from '../mobile-toggle';
 import { UserAvatar } from '../user-avatar';
 import { SocketIndicator } from '../socket-indicator';
 import { ChatVideoButton } from './chat-video-button';
+import { UserButton } from '@clerk/nextjs';
 
 interface ChatHeaderProps {
     serverId: string;
@@ -32,11 +33,21 @@ export const ChatHeader = ({
             <p className="font-semibold text-md text-black dark:text-white">
                 {name}
             </p>
-            <div className="ml-auto flex items-center">
+            <div className="ml-auto flex items-center gap-2">
                 {type === "conversation" && (
                     <ChatVideoButton />
                 )}
                 <SocketIndicator />
+                <div className="hidden max-md:flex">
+                    <UserButton
+                        afterSignOutUrl="/"
+                        appearance={{ 
+                            elements: {
+                                avatarBox: "h-[40px] w-[40px]",
+                            },
+                        }}
+                    />
+                </div>
             </div>
         </div>
     )
