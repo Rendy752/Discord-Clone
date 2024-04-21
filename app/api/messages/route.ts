@@ -60,7 +60,7 @@ export async function GET (
                 ...messages,
                 prevMessage: null,
                 nextMessage: null
-            }))
+            }));
         } else {
             const rawMessages = await db.message.findMany({
                 take: MESSAGES_BATCH,
@@ -91,7 +91,6 @@ export async function GET (
         if (messages.length === MESSAGES_BATCH) {
             nextCursor = messages[messages.length - 1].id;
         }
-
 
         let firstMessageOfNextPage: Message | null = null;
         const nextMessages = await db.message.findMany({
