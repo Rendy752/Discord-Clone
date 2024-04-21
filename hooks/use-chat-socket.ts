@@ -1,10 +1,12 @@
 import { useSocket } from "@/components/providers/socket-provider";
 import { Member, Message, Profile } from "@prisma/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useParams } from "next/navigation";
 
 import { useEffect, useState } from "react";
 
 type ChatSocketProps = {
+    profileId: string;
     addKey: string;
     updateKey: string;
     queryKey: string;
@@ -18,6 +20,7 @@ type MessageWithMemberWithProfile = Message & {
 }
 
 export const useChatSocket = ({
+    profileId,
     addKey,
     updateKey,
     queryKey,
@@ -28,11 +31,61 @@ export const useChatSocket = ({
     const [isTyping, setIsTyping] = useState(false);
     const [userName, setUserName] = useState("");
     const [userId, setUserId] = useState("");
+    const params = useParams();
+    const channelId = params?.channelId as string;
       
     useEffect(() => {
         if (!socket) {
             return;
         }
+
+        const handleNewMessage = (message: MessageWithMemberWithProfile) => {
+            const profileMessageId = message.member.profile.id;
+            const profileName = message.member.profile.name === "null null" ? "Anonymous" : message.member.profile.name;
+            
+            if (profileMessageId !== profileId) {
+                if (!("Notification" in window)) {
+                    console.log("This browser does not support desktop notification");
+                }
+                else if (Notification.permission === "granted") {
+                    new Notification(`New ${channelId !== undefined ? 'channel ' : ''}message from ${profileName}`, { body: message.content });
+                }
+                else if (Notification.permission !== "denied") {
+                    Notification.requestPermission().then(function (permission) {
+                        if (permission === "granted") {
+                            new Notification(`New ${channelId !== undefined ? 'channel ' : ''}message from ${profileName}`, { body: message.content });
+                        }
+                    });
+                }
+            }
+
+            queryClient.setQueryData([queryKey], (oldData: any) => {
+                if (!oldData || !oldData.pages || oldData.pages.length === 0) {
+                    return {
+                        pages: [{
+                            items: [message],
+                        }]
+                    }
+                }
+        
+                const newData = [...oldData.pages];
+        
+                newData[0] = {
+                    ...newData[0],
+                    items: [
+                        message,
+                        ...newData[0].items
+                    ]
+                }
+        
+                setIsTyping(false);
+        
+                return {
+                    ...oldData,
+                    pages: newData,
+                }
+            });
+        };
 
         socket.on(updateKey, (message: MessageWithMemberWithProfile) => {
             queryClient.setQueryData([queryKey], (oldData: any) => {
@@ -59,34 +112,7 @@ export const useChatSocket = ({
             });
         });
 
-        socket.on(addKey, (message: MessageWithMemberWithProfile) => {
-            queryClient.setQueryData([queryKey], (oldData: any) => {
-                if (!oldData || !oldData.pages || oldData.pages.length === 0) {
-                    return {
-                        pages: [{
-                            items: [message],
-                        }]
-                    }
-                }
-
-                const newData = [...oldData.pages];
-
-                newData[0] = {
-                    ...newData[0],
-                    items: [
-                        message,
-                        ...newData[0].items
-                    ]
-                }
-
-                setIsTyping(false);
-
-                return {
-                    ...oldData,
-                    pages: newData,
-                }
-            });
-        });
+        socket.on(addKey, handleNewMessage);
 
         socket.on(typingKey, (userName: string, userId: string) => {
             setIsTyping(true);
@@ -105,7 +131,7 @@ export const useChatSocket = ({
             socket.off(updateKey);
             socket.off(typingKey);
         }
-    }, [queryClient, addKey, queryKey, socket, updateKey, typingKey, isTyping])
+    }, [queryClient, profileId, addKey, queryKey, socket, updateKey, typingKey, isTyping, channelId])
 
     return {
         isTyping,

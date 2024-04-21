@@ -71,7 +71,7 @@ export const ChatMessages = ({
         paramValue
     })
 
-    const { isTyping, userName, userId } = useChatSocket({ queryKey, addKey, updateKey, typingKey});
+    const { isTyping, userName, userId } = useChatSocket({ profileId, queryKey, addKey, updateKey, typingKey});
     useChatScroll({
         topRef,
         bottomRef,
@@ -178,7 +178,7 @@ export const ChatMessages = ({
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: 20 }}
                     transition={{ duration: 0.1 }}
-                    className="bg-white dark:bg-[#313338] fixed bottom-20 md:bottom-0 w-full flex items-center py-1 px-4">
+                    className="bg-white dark:bg-[#313338] fixed bottom-20 md:bottom-0 w-full flex items-center pt-1 pb-3 md:py-2 px-4">
                     <BeatLoader size={8} color={"#1E1F22"} loading={isTyping} />
                     <p className="text-xs text-zinc-600 dark:text-zinc-300 ml-2">
                         {userName} is typing...
