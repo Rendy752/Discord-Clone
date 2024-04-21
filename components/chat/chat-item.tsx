@@ -180,10 +180,13 @@ export const ChatItem = ({
     return (
         <div 
             className={cn(
-                "relative group flex items-center hover:bg-black/5 my-0 px-4 py-1 transition w-full",
+                "relative group flex items-center hover:bg-black/5 my-0 px-4 py-1 transition",
                 isNewMessageHeader && "mt-4"
             )}>
-            <div className="group flex gap-x-2 items-start w-full">
+            <div className={cn(
+                "group flex gap-x-2 items-start",
+                !fileUrl && isEditing && "w-full"
+            )}>
                 {isNewMessageHeader && (
                     <div onClick={onMemberClick} className="cursor-pointer hover:drop-shadow-md hover:scale-105 transition">
                         <UserAvatar src={member.profile.imageUrl}/>
@@ -214,16 +217,16 @@ export const ChatItem = ({
                             href={imageUrl || fileUrl} 
                             target="_blank" 
                             rel="noopener noreferrer" 
-                            className="relative aspect-square rounded-md my-1 overflow-hidden border flex items-center bg-secondary h-48 w-48"
+                            className="my-1 rounded-md bg-secondary"
                         >
                             <Image 
                                 src={imageUrl || fileUrl}
                                 alt={content}
-                                fill
                                 priority
                                 onError={() => setImageUrl(process.env.IMAGE_ERROR_URL || "https://utfs.io/f/c5ecb4cd-cdcd-4ac4-8999-15e5d90659b0-o9bedv.jpg")}
-                                sizes="48"
-                                className="object-cover"
+                                width={300}
+                                height={300}
+                                className="object-cover border rounded-md"
                             />
                         </a>
                     )}
