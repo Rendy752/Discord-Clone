@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from 'uuid';
 import { LiveKitRoom, VideoConference } from "@livekit/components-react";
 import "@livekit/components-styles";
 import { useUser } from "@clerk/nextjs";
@@ -22,12 +23,14 @@ export const MediaRoom = ({
 
     useEffect(() => {
         if (!user?.firstName || !user?.lastName) return;
-
+    
         const name = `${user.firstName} ${user.lastName}`;
-
+        const uniqueId = uuidv4().split("-")[0];
+        const uniqueName = `${name} - ${uniqueId}`;
+    
         (async () => {
             try {
-                const response = await fetch(`/api/livekit?room=${chatId}&username=${name}`);
+                const response = await fetch(`/api/livekit?room=${chatId}&username=${uniqueName}`);
                 const data = await response.json();
                 setToken(data.token);
             } catch (error) {
