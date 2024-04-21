@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import Youtube from "react-youtube";
 import { useModal } from "@/hooks/use-modal-store";
 import { format, isToday, isYesterday } from "date-fns";
 
@@ -103,6 +104,25 @@ export const ChatItem = ({
         }
     }
 
+    const extractVideoId = (url: string): string => {
+        let videoId = '';
+    
+        if (url.includes('youtu.be')) {
+            videoId = url.split('youtu.be/')[1];
+        } else if (url.includes('youtube.com')) {
+            videoId = url.split('v=')[1];
+        }
+    
+        if (videoId) {
+            const ampersandPosition = videoId.indexOf('&');
+            if (ampersandPosition !== -1) {
+                videoId = videoId.substring(0, ampersandPosition);
+            }
+        }
+    
+        return videoId;
+    }
+
     const onMemberClick = () => {
         if (member.id === currentMember.id) {
             return;
@@ -175,6 +195,11 @@ export const ChatItem = ({
     const canEditMessage = !deleted && isOwner && !fileUrl;
     const isPDF = fileType === "pdf" && fileUrl;
     const isImage = !isPDF && fileUrl;
+
+    const isUrl = /^(http|https):\/\/[^ "]+$/.test(content);
+    const isYouTubeLink = /^(http(s)?:\/\/)?((w){3}.)?youtu(be|.be)?(\.com)?\/.+/i.test(content);
+    const videoId = extractVideoId(content);
+
     const isNewMessageHeader = (!isSamePreviousMember || (!isSamePreviousMember || timeDifferenceInMinute > 5)) || isNewDay;
 
     return (
@@ -185,7 +210,7 @@ export const ChatItem = ({
             )}>
             <div className={cn(
                 "group flex gap-x-2 items-start",
-                !fileUrl && isEditing && "w-full"
+                !fileUrl && isEditing && !isYouTubeLink && "w-full"
             )}>
                 {isNewMessageHeader && (
                     <div onClick={onMemberClick} className="cursor-pointer hover:drop-shadow-md hover:scale-105 transition">
@@ -210,6 +235,79 @@ export const ChatItem = ({
                             <span className="text-xs text-zinc-500 dark:text-zinc-400">
                                 {formatTimeStamp(timestamp)}
                             </span>
+                        </div>
+                    )}
+                    {!fileUrl && !isEditing && (
+                        <p className={cn(
+                            "text-sm text-zinc-600 dark:text-zinc-300",
+                            isEmoji && "text-7xl",
+                            deleted && "italic text-zinc-500 dark:text-zinc-400 text-xs mt-1"
+                        )}>
+                            {isUrl ? (
+                                <a 
+                                    className="hover:underline text-indigo-500 dark:text-indigo-400"
+                                    href={content} 
+                                    target="_blank" 
+                                    rel="noopener noreferrer"
+                                >
+                                    {content}
+                                </a>
+                            ) : (
+                                content
+                            )}
+                            {isUpdated && !deleted && (
+                                <span className="text-[10px] mx-2 text-zinc-500 dark:text-zinc-400">
+                                    (edited)
+                                </span>
+                            )}
+                        </p>
+                    )}
+                    {!fileUrl && isEditing && (
+                        <Form {...form}>
+                            <motion.form
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                transition={{ duration: 0.15 }}
+                                className="flex items-center w-full gap-x-2 pt-2"
+                                onSubmit={form.handleSubmit(onSubmit)}
+                            >
+                                <FormField
+                                    control={form.control}
+                                    name="content"
+                                    render={({ field }) => (
+                                        <FormItem className="flex-1">
+                                            <FormControl>
+                                                <div className="relative w-full">
+                                                    <Input
+                                                        disabled={isLoading}
+                                                        className="p-2 bg-zinc-200 dark:bg-zinc-600 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
+                                                        placeholder="Edit message..."
+                                                        {...field}
+                                                    >
+                                                    </Input>
+                                                </div>
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                                <Button disabled={isLoading} size="sm" variant="primary">
+                                    Save
+                                </Button>
+                            </motion.form>
+                            <span className="text-[10px] mt-1 text-zinc-400">
+                                Press esc to cancel, enter to save
+                            </span>
+                        </Form>
+                    )}
+                    {isYouTubeLink && (
+                        <div className="rounded-lg overflow-hidden mb-2">
+                            <Youtube
+                                videoId={videoId}
+                                opts={{
+                                    height: '250',
+                                    width: '100%',
+                                }}
+                            />
                         </div>
                     )}
                     {isImage && (
@@ -242,57 +340,6 @@ export const ChatItem = ({
                             {content}
                             </a>
                         </div>
-                    )}
-                    {!fileUrl && !isEditing && (
-                        <p className={cn(
-                            "text-sm text-zinc-600 dark:text-zinc-300",
-                            isEmoji && "text-7xl",
-                            deleted && "italic text-zinc-500 dark:text-zinc-400 text-xs mt-1"
-                        )}>
-                            {content}
-                            {isUpdated && !deleted && (
-                                <span className="text-[10px] mx-2 text-zinc-500 dark:text-zinc-400">
-                                    (edited)
-                                </span>
-                            )}
-                        </p>
-                    )}
-                    {!fileUrl && isEditing && (
-                        <Form {...form}>
-                            <motion.form
-                                initial={{ opacity: 0 }}
-                                animate={{ opacity: 1 }}
-                                transition={{ duration: 0.15 }}
-                                className="flex items-center w-full gap-x-2 pt-2"
-                                onSubmit={form.handleSubmit(onSubmit)}
-                            >
-                                <FormField
-                                    control={form.control}
-                                    name="content"
-                                    render={({ field }) => (
-                                        <FormItem className="flex-1">
-                                            <FormControl>
-                                                <div className="relative w-full">
-                                                    <Input
-                                                        disabled={isLoading}
-                                                        className="p-2 bg-zinc-200/90 dark:bg-zinc-100/75 border-none border-0 focus-visible:ring-0 focus-visible:ring-offset-0 text-zinc-600 dark:text-zinc-200"
-                                                        placeholder="Edit message..."
-                                                        {...field}
-                                                    >
-                                                    </Input>
-                                                </div>
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                                <Button disabled={isLoading} size="sm" variant="primary">
-                                    Save
-                                </Button>
-                            </motion.form>
-                            <span className="text-[10px] mt-1 text-zinc-400">
-                                Press esc to cancel, enter to save
-                            </span>
-                        </Form>
                     )}
                 </div>
             </div>
