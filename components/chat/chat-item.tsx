@@ -92,9 +92,13 @@ export const ChatItem = ({
         }
     }, [content]);
 
-    const formatTimeStamp = (timestamp: string) => {
+    const formatTimeStamp = (timestamp: string, isOnlyTime: boolean = false) => {
         const date = new Date(timestamp);
         
+        if (isOnlyTime) {
+            return format(date, 'h:mm a');
+        }
+
         if (isToday(date)) {
             return `Today at ${format(date, 'h:mm a')}`;
         } else if (isYesterday(date)) {
@@ -209,18 +213,22 @@ export const ChatItem = ({
                 isNewMessageHeader && "mt-4"
             )}>
             <div className={cn(
-                "group flex gap-x-2 items-start",
+                "group flex gap-x-5 items-start",
                 !fileUrl && isEditing && !isYouTubeLink && "w-full"
             )}>
-                {isNewMessageHeader && (
+                {isNewMessageHeader ? (
                     <div onClick={onMemberClick} className="cursor-pointer hover:drop-shadow-md hover:scale-105 transition">
                         <UserAvatar src={member.profile.imageUrl}/>
+                    </div>
+                ) : (
+                    <div className="absolute hidden group-hover:flex text-xs h-13 w-13 text-zinc-500 dark:text-zinc-400">
+                        {formatTimeStamp(timestamp, true)}
                     </div>
                 )}
                 <div 
                     className={cn(
                         "flex flex-col w-full",
-                        !isNewMessageHeader && "pl-9 md:pl-12"
+                        !isNewMessageHeader && "pl-12 md:pl-[60px]"
                     )}>
                     {isNewMessageHeader && (
                         <div className="flex items-center gap-x-2">
