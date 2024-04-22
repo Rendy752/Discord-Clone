@@ -35,7 +35,7 @@ export default async function handler (
     try {
         const profile = await currentProfilePages(req);
         const { content, fileUrl } = req.body;
-        const { conversationId } = req.query;
+        const { conversationId, userImage } = req.query;
 
         if (!profile) {
             return res.status(401).json({ error: "Unauthorized" });
@@ -107,7 +107,13 @@ export default async function handler (
 
         const channelKey = `chat:${conversationId}:messages`;
 
-        res?.socket?.server?.io?.emit(channelKey, message);
+        res?.socket?.server?.io?.emit(
+            channelKey, 
+            message,
+            {
+                image: userImage,
+            },
+        );
         
         return res.status(200).json(message);
     } catch (error) {

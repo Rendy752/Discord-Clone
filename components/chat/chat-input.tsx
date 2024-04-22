@@ -18,6 +18,7 @@ import { Plus } from "lucide-react";
 import { useModal } from "@/hooks/use-modal-store";
 import { EmojiPicker } from "../emoji-picker";
 import { useRef } from "react";
+import { useUser } from "@clerk/nextjs";
 
 interface ChatInputProps {
     apiUrl: string;
@@ -36,6 +37,8 @@ export const ChatInput = ({
     name,
     type,
 }: ChatInputProps) => {
+    const { user } = useUser();
+    const userImage = user?.externalAccounts[0].imageUrl;
     const { onOpen } = useModal();
     const router = useRouter();
     const params = useParams();
@@ -53,7 +56,10 @@ export const ChatInput = ({
         try {
             const url = qs.stringifyUrl({
                 url: apiUrl,
-                query
+                query: {
+                    ...query,
+                    userImage
+                }
             });
 
             await axios.post(url, values);
