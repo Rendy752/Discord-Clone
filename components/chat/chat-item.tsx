@@ -213,8 +213,9 @@ export const ChatItem = ({
                 isNewMessageHeader && "mt-4"
             )}>
             <div className={cn(
-                "group flex gap-x-5 items-start",
-                !fileUrl && isEditing && !isYouTubeLink && "w-full"
+                "group flex gap-x-7 items-start",
+                !fileUrl && isEditing && !isYouTubeLink && "w-full",
+                !isNewMessageHeader && "items-center",
             )}>
                 {isNewMessageHeader ? (
                     <div onClick={onMemberClick} className="cursor-pointer hover:drop-shadow-md hover:scale-105 transition">
@@ -228,7 +229,7 @@ export const ChatItem = ({
                 <div 
                     className={cn(
                         "flex flex-col w-full",
-                        !isNewMessageHeader && "pl-12 md:pl-[60px]"
+                        !isNewMessageHeader && "pl-14 md:pl-[68px]"
                     )}>
                     {isNewMessageHeader && (
                         <div className="flex items-center gap-x-2">
