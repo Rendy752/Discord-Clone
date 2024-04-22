@@ -213,16 +213,16 @@ export const ChatItem = ({
                 isNewMessageHeader && "mt-4"
             )}>
             <div className={cn(
-                "group flex gap-x-7 items-start",
+                "group flex items-start",
                 !fileUrl && isEditing && !isYouTubeLink && "w-full",
-                !isNewMessageHeader && "items-center",
+                !isNewMessageHeader && "justify-center",
             )}>
                 {isNewMessageHeader ? (
-                    <div onClick={onMemberClick} className="cursor-pointer hover:drop-shadow-md hover:scale-105 transition">
+                    <div onClick={onMemberClick} className="cursor-pointer hover:drop-shadow-md hover:scale-105 transition px-[14px]">
                         <UserAvatar src={member.profile.imageUrl}/>
                     </div>
                 ) : (
-                    <div className="absolute hidden group-hover:flex text-xs h-13 w-13 text-zinc-500 dark:text-zinc-400">
+                    <div className="absolute pt-[2px] left-[19px] md:left-[25px] hidden group-hover:flex text-xs h-13 w-13 text-zinc-500 dark:text-zinc-400">
                         {formatTimeStamp(timestamp, true)}
                     </div>
                 )}

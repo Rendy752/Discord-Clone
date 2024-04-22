@@ -19,6 +19,11 @@ type MessageWithMemberWithProfile = Message & {
     };
 }
 
+type NotificationData = {
+    description?: string;
+    image: string;
+};
+
 export const useChatSocket = ({
     profileId,
     addKey,
@@ -39,21 +44,22 @@ export const useChatSocket = ({
             return;
         }
 
-        const handleNewMessage = (message: MessageWithMemberWithProfile) => {
+        const handleNewMessage = (message: MessageWithMemberWithProfile, {description, image}: NotificationData) => {
             const profileMessageId = message.member.profile.id;
             const profileName = message.member.profile.name === "null null" ? "Anonymous" : message.member.profile.name;
             
             if (profileMessageId !== profileId) {
+                const notification = new Notification(`${profileName} ${description ? `(${description})` : ''}`, { body: message.content, icon: image });
                 if (!("Notification" in window)) {
                     console.log("This browser does not support desktop notification");
                 }
                 else if (Notification.permission === "granted") {
-                    new Notification(`New ${channelId !== undefined ? 'channel ' : ''}message from ${profileName}`, { body: message.content });
+                    notification;
                 }
                 else if (Notification.permission !== "denied") {
                     Notification.requestPermission().then(function (permission) {
                         if (permission === "granted") {
-                            new Notification(`New ${channelId !== undefined ? 'channel ' : ''}message from ${profileName}`, { body: message.content });
+                            notification;
                         }
                     });
                 }
@@ -86,6 +92,7 @@ export const useChatSocket = ({
                 }
             });
         };
+        socket.on(addKey, handleNewMessage);
 
         socket.on(updateKey, (message: MessageWithMemberWithProfile) => {
             queryClient.setQueryData([queryKey], (oldData: any) => {
@@ -111,8 +118,6 @@ export const useChatSocket = ({
                 }
             });
         });
-
-        socket.on(addKey, handleNewMessage);
 
         socket.on(typingKey, (userName: string, userId: string) => {
             setIsTyping(true);
