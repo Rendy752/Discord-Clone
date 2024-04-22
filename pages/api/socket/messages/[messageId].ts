@@ -4,6 +4,9 @@ import { NextApiResponseServerIo } from "@/types";
 import { currentProfilePages } from "@/lib/current-profile-pages";
 import { db } from "@/lib/db";
 import { MemberRole } from "@prisma/client";
+import qs from "query-string";
+import axios from "axios";
+import { UTApi } from "uploadthing/server";
 
 export default async function handler (
     req: NextApiRequest,
@@ -93,6 +96,31 @@ export default async function handler (
         }
 
         if (req.method === "DELETE") {
+            message = await db.message.findUnique({
+                where: {
+                    id: messageId as string,
+                },
+                include: {
+                    member: {
+                        include: {
+                            profile: true,
+                        },
+                    },
+                },
+            });
+            
+            const fileUrl = message?.fileUrl;
+            if (message?.fileUrl) {
+                const url = new URL(fileUrl as string);
+                const segments = url.pathname.split('/');
+                const fileName = segments.pop();
+
+                if (!fileName) return;
+                
+                const utapi = new UTApi();
+                await utapi.deleteFiles(fileName);
+            }
+
             message = await db.message.update({
                 where: {
                     id: messageId as string,

@@ -4,6 +4,9 @@ import { NextApiResponseServerIo } from "@/types";
 import { currentProfilePages } from "@/lib/current-profile-pages";
 import { db } from "@/lib/db";
 import { MemberRole } from "@prisma/client";
+import qs from "query-string";
+import axios from "axios";
+import { UTApi } from "uploadthing/server";
 
 export default async function handler (
     req: NextApiRequest,
@@ -94,6 +97,31 @@ export default async function handler (
         }
 
         if (req.method === "DELETE") {
+            directMessage = await db.directMessage.findUnique({
+                where: {
+                    id: directMessageId as string,
+                },
+                include: {
+                    member: {
+                        include: {
+                            profile: true,
+                        },
+                    },
+                },
+            });
+            
+            const fileUrl = directMessage?.fileUrl;
+            if (directMessage?.fileUrl) {
+                const url = new URL(fileUrl as string);
+                const segments = url.pathname.split('/');
+                const fileName = segments.pop();
+
+                if (!fileName) return;
+                
+                const utapi = new UTApi();
+                await utapi.deleteFiles(fileName);
+            }
+
             directMessage = await db.directMessage.update({
                 where: {
                     id: directMessageId as string,
