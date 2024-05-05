@@ -27,7 +27,7 @@ export const MediaRoom = ({
     useEffect(() => {
         if (!user?.firstName || !user?.lastName) return;
     
-        const name = `${user.firstName} ${user.lastName}`;
+        const name = user.username || `${user.firstName} ${user.lastName}`;
         const uniqueId = uuidv4().split("-")[0];
         const uniqueName = `${name} - ${uniqueId}`;
     
@@ -40,7 +40,7 @@ export const MediaRoom = ({
                 console.error(error);
             }
         })()
-    }, [user?.firstName, user?.lastName, chatId]);
+    }, [user?.firstName, user?.lastName, chatId, user?.username]);
 
     if (token === "") {
         return (
@@ -55,6 +55,7 @@ export const MediaRoom = ({
 
     return (
         <LiveKitRoom
+            className="rounded-lg p-4"
             data-lk-theme="default"
             serverUrl={process.env.NEXT_PUBLIC_LIVEKIT_URL}
             token={token}

@@ -9,6 +9,7 @@ import { ChatHeader } from "@/components/chat/chat-header";
 import { ChatMessages } from "@/components/chat/chat-messages";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MediaRoom } from "@/components/media-room";
+import { initialProfile } from "@/lib/initial-profile";
 interface MemberIdPageProps {
     params: {
         memberId: string;
@@ -23,6 +24,7 @@ const MemberIdPage = async ({
     params,
     searchParams
 }: MemberIdPageProps) => {
+    await initialProfile();
     const profile = await currentProfile();
 
     if (!profile) {
