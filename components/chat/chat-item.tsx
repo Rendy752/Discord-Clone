@@ -9,7 +9,7 @@ import { Member, MemberRole, Profile } from "@prisma/client";
 import Image from "next/image";
 import { UserAvatar } from "../user-avatar";
 import { ActionTooltip } from "../action-tooltip";
-import { Edit, FileIcon, ShieldAlert, ShieldCheck, Trash } from "lucide-react";
+import { Copy, CopyCheck, Edit, FileIcon, ShieldAlert, ShieldCheck, Trash } from "lucide-react";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -81,6 +81,7 @@ export const ChatItem = ({
     const params = useParams();
     const router = useRouter();
     const [isEmoji, setIsEmoji] = useState(false);
+    const [isCopied, setIsCopied] = useState(false);
 
     useEffect(() => {
         const emojiRegex = /^[\p{Emoji_Presentation}]\s*$/u;
@@ -184,6 +185,12 @@ export const ChatItem = ({
             console.log(error);
         }
     }
+
+    const handleCopy = async () => {
+        await navigator.clipboard.writeText(content);
+        setIsCopied(true);
+        setTimeout(() => setIsCopied(false), 3000);
+    };
 
     useEffect(() => {
         form.reset({
@@ -354,6 +361,20 @@ export const ChatItem = ({
             </div>
             {canDeleteMessage && (
                 <div className="hidden group-hover:flex items-center gap-x-2 absolute p-1 -top-2 right-5 bg-white dark:bg-zinc-800 border rounded-sm">
+                    {!isImage && !isPDF && !isEditing && (
+                        <ActionTooltip label={isCopied ? "Copied" : "Copy"} side="top">
+                            {isCopied ? (
+                                <CopyCheck 
+                                    className="w-4 h-4 text-green-500 dark:text-green-400"
+                                />
+                            ) : (
+                                <Copy 
+                                    onClick={handleCopy}
+                                    className="cursor-pointer w-4 h-4 text-zinc-500 hover:text-zinc-600 dark:hover:text-zinc-300 transition"
+                                />
+                            )}
+                        </ActionTooltip>
+                    )}
                     {canEditMessage && (
                         <ActionTooltip label="Edit" side="top">
                             <Edit 
