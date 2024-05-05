@@ -9,6 +9,7 @@ import { MediaRoom } from "@/components/media-room";
 
 import { db } from "@/lib/db";
 import { ChannelType } from "@prisma/client";
+import { initialProfile } from "@/lib/initial-profile";
 
 interface ChannelIdPageProps {
     params: {
@@ -20,6 +21,7 @@ interface ChannelIdPageProps {
 const ChannelIdPage = async ({
     params
 }: ChannelIdPageProps) => {
+    await initialProfile();
     const profile = await currentProfile();
 
     if (!profile) {
