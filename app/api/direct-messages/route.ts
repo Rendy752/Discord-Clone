@@ -170,6 +170,7 @@ export async function GET (
                 fileUrl: message.prevMessage.fileUrl,
                 memberId: message.prevMessage.memberId,
                 conversationId: message.prevMessage.conversationId,
+                replyToId: message.prevMessage.replyToId,
                 deleted: message.prevMessage.deleted,
                 createdAt: message.prevMessage.createdAt,
                 updatedAt: message.prevMessage.updatedAt
@@ -180,6 +181,7 @@ export async function GET (
                 fileUrl: message.nextMessage.fileUrl,
                 memberId: message.nextMessage.memberId,
                 conversationId: message.nextMessage.conversationId,
+                replyToId: message.nextMessage.replyToId,
                 deleted: message.nextMessage.deleted,
                 createdAt: message.nextMessage.createdAt,
                 updatedAt: message.nextMessage.updatedAt
