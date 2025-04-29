@@ -18,14 +18,17 @@ export const useSocket = () => {
 };
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-  const [socket, setSocket] = useState<any>(null);
+  const [socket, setSocket] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    const socketInstance = ClientIO(process.env.NEXT_PUBLIC_SITE_URL!, {
-      path: "/api/socket/io",
-      addTrailingSlash: false,
-    });
+    const socketInstance = new (ClientIO as any)(
+      process.env.NEXT_PUBLIC_SITE_URL!,
+      {
+        path: "/api/socket/io",
+        addTraillingSlash: false,
+      }
+    );
 
     socketInstance.on("connect", () => {
       setIsConnected(true);
@@ -37,14 +40,7 @@ export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
 
     setSocket(socketInstance);
 
-    const interval = setInterval(() => {
-      if (socketInstance) {
-        setIsConnected(socketInstance.connected);
-      }
-    }, 1000);
-
     return () => {
-      clearInterval(interval);
       socketInstance.disconnect();
     };
   }, []);
